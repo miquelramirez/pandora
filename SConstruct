@@ -12,7 +12,7 @@ vars.Add('installDir', 'directory where to install Pandora', '/usr/local/pandora
 
 if platform.system()=='Linux':
     if not os.path.exists('/usr/local/hdf5') :
-        vars.Add(PathVariable('hdf5', 'Path where HDF5 library was installed', '/usr', PathVariable.PathIsDir))        
+        vars.Add(PathVariable('hdf5', 'Path where HDF5 library was installed', '/usr', PathVariable.PathIsDir))
     else :
         vars.Add(PathVariable('hdf5', 'Path where HDF5 library was installed', '/usr/local/hdf5', PathVariable.PathIsDir))
 
@@ -26,7 +26,7 @@ Help(vars.GenerateHelpText(env))
 
 env.Append(LIBS = 'pthread gdal hdf5 z tinyxml boost_filesystem boost_system boost_timer boost_chrono gomp mpl dl'.split())
 
-env.Append(CCFLAGS = '-DTIXML_USE_STL -fopenmp -std=c++0x')
+env.Append(CCFLAGS = '-DTIXML_USE_STL -DH5_HAVE_PARALLEL -fopenmp -std=c++0x')
 
 if platform.system()=='Darwin':
     env.Append(CCFLAGS = '-cxx=g++-4.8')
@@ -58,7 +58,7 @@ else:
 env.Append(CPPPATH = 'include include/analysis'.split())
 
 if platform.system()=='Linux':
-    env.Append(CPPPATH = [env['hdf5']+'/include', '/usr/include/gdal/'])
+    env.Append(CPPPATH = [env['hdf5']+'/include/hdf5/serial', '/usr/include/gdal/'])
     env.Append(CPPPATH = [env['hdf5']+'/include'])
     env.Append(LIBPATH = [env['hdf5']+'/lib'])
 elif platform.system()=='Darwin':
@@ -101,8 +101,8 @@ envPython = conf.Finish()
 
 # versioned lib do not create correct links with .so in osx
 if platform.system()=='Linux':
-    sharedPyLib = envPython.SharedLibrary('lib/'+pythonLibraryName,  srcPyFiles, SHLIBVERSION=version)
-    sharedLib = env.SharedLibrary('lib/'+libraryName, srcBaseFiles, SHLIBVERSION=version)
+    sharedPyLib = envPython.SharedLibrary('lib/'+pythonLibraryName,  srcPyFiles)#, SHLIBVERSION=version)
+    sharedLib = env.SharedLibrary('lib/'+libraryName, srcBaseFiles)#, SHLIBVERSION=version)
 elif platform.system()=='Darwin':
     sharedPyLib = envPython.SharedLibrary('lib/'+pythonLibraryName,  srcPyFiles)
     sharedLib = env.SharedLibrary('lib/'+libraryName, srcBaseFiles)
