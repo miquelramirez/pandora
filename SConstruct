@@ -11,7 +11,10 @@ vars.Add(BoolVariable('python2', 'use Python2.7 instead of Python3', 'no'))
 vars.Add('installDir', 'directory where to install Pandora', '/usr/local/pandora')
 
 if platform.system()=='Linux':
-    vars.Add(PathVariable('hdf5', 'Path where HDF5 library was installed', '/usr/local/hdf5', PathVariable.PathIsDir))
+    if not os.path.exists('/usr/local/hdf5') :
+        vars.Add(PathVariable('hdf5', 'Path where HDF5 library was installed', '/usr', PathVariable.PathIsDir))        
+    else :
+        vars.Add(PathVariable('hdf5', 'Path where HDF5 library was installed', '/usr/local/hdf5', PathVariable.PathIsDir))
 
 env = Environment(variables=vars, ENV=os.environ, CXX='mpicxx')
 if env['debug'] == False:
@@ -70,7 +73,7 @@ if platform.system()=='Linux':
 if env['debug'] == False:
     envPython.VariantDir('build_py', '.')
     srcPyFiles = ['build_py/' + src for src in srcFiles]
-else:    
+else:
     envPython.VariantDir('buildDebug_py', '.')
     srcPyFiles = ['buildDebug_py/' + src for src in srcFiles]
 
@@ -86,13 +89,13 @@ if(env['python2']==False):
     elif conf.CheckLib('boost_python-py34'):
         envPython.Append(LIBS = 'boost_python-py34')
     else:
-        envPython.Append(LIBS = 'boost_python3') 
+        envPython.Append(LIBS = 'boost_python3')
 else:
     envPython.ParseConfig("python-config --includes --ldflags")
     if conf.CheckLib('boost_python-py27'):
         envPython.Append(LIBS = 'boost_python-py27')
     else:
-        envPython.Append(LIBS = 'boost_python') 
+        envPython.Append(LIBS = 'boost_python')
 
 envPython = conf.Finish()
 
@@ -138,4 +141,3 @@ Default(sharedLib)
 Default(sharedPyLib)
 env.Alias('cassandra', cassandraCompilation)
 env.Alias('install', [cassandraCompilation, sharedLib, sharedPyLib, installedLib, installedPyLib, installedHeaders, installedAnalysisHeaders, installBin, installShare, installMpiStub])
-
