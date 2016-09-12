@@ -32,6 +32,10 @@ need to be installed:
   - `libqwt6`, **Ubuntu 16.04**: not needed anymore
   - `libqt4-dev`
 
+ - HDF5 **Ubuntu 16.04**
+  - `libhdf5-mpi-dev`, HDF5 *parallel*
+  - `libhdf5-dev`, HDF5 *serial*
+
  - GIS support
   - `libgdal1-dev`
 
@@ -67,64 +71,101 @@ directory.
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/hdf5/lib/
 ```
 
-### Compiling HDF5
+### Compiling HDF5 (Only for Ubuntu 15.x and older)
+
 
 Ubuntu dependencies forces you to install the serial version of HDF5 as gdaldependency. For this reason, we will need to download, compile and install hdf5.
-	* Go to HDF5 webpage and download the sources:
+
+First we need to go to the `HDF5` webpage and download the sources:
+```
 		$ cd ~/
 		$ mkdir hdf5
 		$ cd hdf5
 		$ wget "http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.17.tar.bz2"
+```
 
-	* Unzip the file:
+we decompress the file:
+```
 		$ tar jxvf hdf5-1.8.17.tar.bz2
-
-	* configure the library:
+```
+configure the library:
+```
 		$ cd hdf5-1.8.17
 		$ ./configure --enable-parallel --prefix=/usr/local/hdf5 --disable-shared --with-pic
-		(if you want more information type ./configure --help)
-
-	* compile and install:
+```
+if you are curious about other possible configuration options, check the documentation by typing
+```
+./configure --help
+```
+Now we're ready to compile and install:
+```
 		$ make
 		$ sudo make install
+```
 
-- Compiling Pandora
-	* Go to the folder where Pandora is deployed:
+### Compiling Pandora
+
+Go to the folder where Pandora is deployed:
+```
 		$ cd PATHTOPANDORA/pandora/
-	* Compile:
+```
+Compile it:
+```
 		$ scons
-		- if you want to compile in debug mode type: $ scons debug=1
-        - if you want to use python2.7 type: $scons python2
-        - you can check the full list of options with: $ scons -h
+```
+note that
+ - if you want to compile in debug mode type: ```$ scons debug=1```
+ - if you want to use python2.7 type: ```$ scons python2```
+you can check the full list of options with: ```$ scons -h```.
 
-- Installing Pandora
-	* Go to the folder where Pandora is deployed:
+### Installing Pandora
+
+Go to the folder where Pandora is deployed:
+```
 		$ cd PATHTOPANDORA/pandora/
-	* execute:
-        $ sudo scons install (providing root password)
-        By default Pandora will be installed in /usr/local/pandora. If you want to use a different directory use the option installDir=$PATH, such ash:
+```
+execute (requires you to enter the root password):
+```
+        $ sudo scons install
+```
+By default Pandora will be installed in `/usr/local/pandora`. If you want to use a different directory use the
+option `installDir=$PATH`, for instance:
+```
         $ sudo scons install installDir=/opt/
-
-    * You will need to add Pandora directory to your .bashrc, using these lines:
+```
+You will need to add Pandora directory to your .bashrc, using these lines:
+```
         export PANDORAPATH=/usr/local/pandora
         export PATH=$PATH:$PANDORAPATH/bin/
         export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PANDORAPATH/lib/
+```
+Please change `PANDORAPATH` if you used a different installation directory.
 
-        Please change PANDORAPATH if you used a different installation directory.
+#### Test with an example
 
-- Test with an example
-	* Go to any example or app and compile it:
+Go to any example or app and compile it:
+```
 		$ cd examples/randomWalkers/
 		$ scons
-
-	* Execute it:
+```
+Once the compiler finishes, just execute it:
+```
 		$ ./randomWalkers
+```
 
-- Compiling cassandra
-    * Go to the folder where Pandora is deployed:
-		$ cd PATHTOPANDORA/pandora/
-	* execute:
+### Compiling cassandra
+
+Go to the folder where Pandora is deployed:
+```
+$ cd PATHTOPANDORA/pandora/
+```
+then execute:
+```
         $ scons cassandra
-	* Execute it:
+```
+once it is finished, hopefully without any error, you can run it with the
+following command:
+```
 		$ ./bin/cassandra
-	* Finally, check whether the results of randomWalkers (they should be inside a 'data' directory) are loaded correctly in cassandra.
+```
+Finally, check whether the results of randomWalkers (they should be inside a ``'data'`` directory) are loaded correctly in cassandra.
