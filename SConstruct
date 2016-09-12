@@ -43,6 +43,10 @@ else:
     libraryName = 'pandora.so'
     pythonLibraryName = 'pyPandora.so'
 
+#env.ParseConfig('pkg-config hdf5-serial --cflags --libs')
+# MRJ: I think this is the version that actually we need to use, right?
+env.ParseConfig('pkg-config hdf5-openmpi --cflags --libs')
+
 coreFiles = [str(f) for f in Glob('src/*.cxx')]
 analysisFiles = [str(f) for f in Glob('src/analysis/*.cxx')]
 srcFiles = coreFiles + analysisFiles
@@ -58,7 +62,7 @@ else:
 env.Append(CPPPATH = 'include include/analysis'.split())
 
 if platform.system()=='Linux':
-    env.Append(CPPPATH = [env['hdf5']+'/include/hdf5/serial', '/usr/include/gdal/'])
+    env.Append(CPPPATH = ['/usr/include/gdal/'])
     env.Append(CPPPATH = [env['hdf5']+'/include'])
     env.Append(LIBPATH = [env['hdf5']+'/lib'])
 elif platform.system()=='Darwin':
@@ -88,6 +92,8 @@ if(env['python2']==False):
         envPython.Append(LIBS = 'boost_python-py33')
     elif conf.CheckLib('boost_python-py34'):
         envPython.Append(LIBS = 'boost_python-py34')
+    elif conf.CheckLib('boost_python-py35'):
+        envPython.Append(LIBS = 'boost_python-py35')
     else:
         envPython.Append(LIBS = 'boost_python3')
 else:
