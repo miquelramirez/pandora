@@ -1,3 +1,4 @@
+## Status of Tutorials
 
 intro - ok
 00 -> Installing - ok
@@ -12,6 +13,9 @@ intro - ok
 09 -> R
 
 Statistics?
+
+
+## Random thoughts and notes
 
 Altres
 
@@ -39,7 +43,4 @@ Altres
 4 - Using Pandora in HPC
 	* Understanding the mechanism
 		* Distributed Hello World
-	* 
-
-
-
+	*
