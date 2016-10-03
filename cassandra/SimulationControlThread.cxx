@@ -14,16 +14,17 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *  
- * You should have received a copy of the GNU General Public 
+ *
+ * You should have received a copy of the GNU General Public
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 #include <SimulationControlThread.hxx>
 #include <sstream>
 #include <cstdlib>
 #include <iomanip>
+#include <iostream>
 #include <boost/filesystem.hpp>
 
 #ifdef __linux
@@ -60,7 +61,7 @@ void SimulationControlThread::run()
 			argv[0] = &(_simulationBinary[0]);
 			argv[1] = 0;
 			std::cout << "sim bin: " << _simulationBinary << " from work: " << workingDirectory.str() << std::endl;
-			execv(_simulationBinary.c_str(), argv); 
+			execv(_simulationBinary.c_str(), argv);
 		}
 		else
 		{
@@ -100,6 +101,5 @@ void SimulationControlThread::cancelExecution()
 {
 	_cancelExecution = true;
 }
-	
-} // namespace GUI
 
+} // namespace GUI

@@ -4,6 +4,7 @@
 #include <sstream>
 #include <fstream>
 #include <iomanip>
+#include <iostream>
 
 namespace GUI
 {
@@ -27,14 +28,14 @@ void TimeSeriesModel::fillParamNames( const std::string & groupFile )
 
     std::vector<std::string> tokens;
     std::istringstream iss(line);
-    std::string token;        
-    
+    std::string token;
+
     // iterate through first line
     _paramNames.clear();
     // first is run name
     std::getline(iss, token, ';');
     while(std::getline(iss, token, ';'))
-    {    
+    {
         bool isParamName = true;
         // remove params that are in results (they are NOT params)
         for(auto resultName : _resultNames)
@@ -54,7 +55,7 @@ void TimeSeriesModel::fillParamNames( const std::string & groupFile )
 }
 
 void TimeSeriesModel::fillTimeSteps( const std::string & file )
-{   
+{
     _timeSteps.clear();
     setlocale ( LC_NUMERIC, "C" );
     std::ifstream infile(file.c_str());
@@ -86,8 +87,8 @@ void TimeSeriesModel::fillResultNames( const std::string & file )
 
     std::vector<std::string> tokens;
     std::istringstream iss(line);
-    std::string token;        
-    
+    std::string token;
+
     _resultNames.clear();
     // timeStep is always the first param
     std::getline(iss, token, ';');
@@ -120,7 +121,7 @@ void TimeSeriesModel::fillParams( const std::string & groupFile )
         std::cout << "line: " << line << std::endl;
 
         std::istringstream iss(line);
-        std::string token;        
+        std::string token;
         std::getline(iss, token, ';');
         for(size_t i=0; i<_paramNames.size(); i++)
         {
@@ -132,7 +133,7 @@ void TimeSeriesModel::fillParams( const std::string & groupFile )
 }
 
 void TimeSeriesModel::fillResults( const std::string & file )
-{   
+{
     std::vector< std::vector<float> > run;
     run.resize(_resultNames.size());
 
@@ -201,12 +202,12 @@ const std::vector<std::string> & TimeSeriesModel::paramNames() const
 {
     return _paramNames;
 }
- 
+
 const std::vector<std::string> & TimeSeriesModel::resultNames() const
 {
     return _resultNames;
 }
- 
+
 const std::vector<int> & TimeSeriesModel::timeSteps() const
 {
     return _timeSteps;
@@ -216,7 +217,7 @@ size_t TimeSeriesModel::numRuns() const
 {
     return _params.size();
 }
-    
+
 float TimeSeriesModel::params( const size_t & run, const size_t & paramIndex ) const
 {
     return _params.at(run).at(paramIndex);
@@ -234,7 +235,7 @@ float TimeSeriesModel::results( const size_t & run, const size_t & resultIndex, 
     }
     return 0.0f;
 }
-    
+
 float TimeSeriesModel::mean( int step ) const
 {
     float value = 0.0f;
@@ -307,7 +308,7 @@ float TimeSeriesModel::maxResultValue() const
 }
 
 float TimeSeriesModel::minResultValue() const
-{   
+{
     float minValue = std::numeric_limits<float>::max();
     for(auto step : _timeSteps)
     {
@@ -319,7 +320,7 @@ float TimeSeriesModel::minResultValue() const
     }
     return minValue;
 }
-    
+
 bool TimeSeriesModel::isEmpty() const
 {
     if(_results.size()==0)
@@ -328,7 +329,7 @@ bool TimeSeriesModel::isEmpty() const
     }
     return false;
 }
-    
+
 void TimeSeriesModel::setSelectedValues( int paramIndex, const std::vector<float> & selectedValues )
 {
     _selectedValues.at(paramIndex).clear();
@@ -337,4 +338,3 @@ void TimeSeriesModel::setSelectedValues( int paramIndex, const std::vector<float
 }
 
 } // namespace GUI
-
