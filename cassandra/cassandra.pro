@@ -20,27 +20,38 @@ FORMS += uis/HeatMapDialog.ui
 FORMS += uis/TimeSeriesDialog.ui
 
 DEFINES += TIXML_USE_STL
+DEFINES += H5_HAVE_PARALLEL
 DEPENDPATH += .
 INCLUDEPATH += .
 INCLUDEPATH += uis/
 INCLUDEPATH += ../include
 INCLUDEPATH += ../include/analysis
+INCLUDEPATH += /usr/include/openmpi
+INCLUDEPATH += /usr/include/hdf5/openmpi
+INCLUDEPATH += /usr/include/gdal
+INCLUDEPATH += /usr/include
 INCLUDEPATH += /usr/include/qwt/
-INCLUDEPATH += /usr/include/mpich2/ 
-INCLUDEPATH += /usr/include/mpich/ 
+INCLUDEPATH += /usr/include/mpich2/
+INCLUDEPATH += /usr/include/mpich/
 INCLUDEPATH += /usr/include/GL/
 INCLUDEPATH += /usr/include/qt4/QtOpenGL/
 INCLUDEPATH += /usr/include/qt4/
 INCLUDEPATH += /usr/include/IL/
-INCLUDEPATH += /usr/local/hdf5/include/
-INCLUDEPATH += /usr/local/qwt-6.0.0/include/
 CONFIG += qt
+QT += opengl
+QMAKE_CXX = mpicxx
+QMAKE_CPP = mpicxx
+QMAKE_LINK = mpicxx
+
+
+#QMAKE_CXXFLAGS += -fopenmap
 QMAKE_CXXFLAGS += -std=c++11
 QMAKE_LIBDIR += ../lib/
 QMAKE_LIBS += -lpandora
 
 # Required when installing qwt-6.0.0 from sources
-LIBS += -fopenmp -Llib/ -L/usr/local/qwt-6.0.0/lib/ -L/usr/local/hdf5/lib/ -lqwt -lhdf5 -lGL -lGLU -lQtOpenGL -lIL -ltinyxml -lboost_filesystem -lboost_system 
+LIBS += -L/usr/lib/x86_64-linux-gnu/hdf5/openmpi -L/usr/lib/openmpi/lib -L/usr/lib -L/usr/lib/python3.5/config-3.5m-x86_64-linux-gnu
+LIBS += -lgdal -lz -ltinyxml -lboost_filesystem -lboost_system -lboost_timer -lboost_chrono -lgomp -lmpl -lqwt -lhdf5 -lGL -lGLU -lIL -ILU -lmpi -lpython3.5m -lpthread -ldl -lutil -lm -lboost_python-py35 -lboost_python-py35
 
 # Input
 HEADERS += Display2D.hxx MainWindow.hxx AgentTypeSelection.hxx AgentTraitSelection.hxx DataPlot.hxx GenericStatistics.hxx StepDataPlot.hxx RasterSelection.hxx Display3D.hxx AgentConfigurator.hxx Model3D.hxx Object3D.hxx Material.hxx Loader3DS.hxx ColorSelector.hxx DefaultColorSelector.hxx AgentConfiguration.hxx RasterConfigurator.hxx ColorInterval.hxx RasterConfiguration.cxx ProjectConfiguration.hxx LoadSimulationThread.hxx LoadingProgressBar.hxx QuadTree.hxx Settings.hxx Laboratory.hxx RunSimulations.hxx SimulationControlThread.hxx AgentAnalysis.hxx RasterAnalysis.hxx TraitAnalysisSelection.hxx RasterAnalysisSelection.hxx AnalysisControlThread.hxx RunAnalysis.hxx HeatMapView.hxx HeatMapDialog.hxx HeatMapModel.hxx TimeSeriesDialog.hxx TimeSeriesModel.hxx TimeSeriesView.hxx
@@ -48,4 +59,3 @@ SOURCES += main.cxx Display2D.cxx  MainWindow.cxx AgentTypeSelection.cxx AgentTr
 
 DESTDIR = ../bin
 RESOURCES = cassandra.qrc
-
