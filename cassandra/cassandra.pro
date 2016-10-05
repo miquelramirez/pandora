@@ -4,7 +4,7 @@
 
 
 TEMPLATE = app
-TARGET =
+TARGET = cassandra
 FORMS += uis/AgentConfigurator.ui
 FORMS += uis/Settings.ui
 FORMS += uis/RasterConfigurator.ui
