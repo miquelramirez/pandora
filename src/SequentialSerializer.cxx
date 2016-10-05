@@ -47,7 +47,7 @@ void SequentialSerializer::init( World & world )
 	H5Awrite(attributeId, H5T_NATIVE_INT, &_config->getNumSteps());
 	H5Sclose(attributeFileSpace);
 	H5Aclose(attributeId);
-	
+
 	attributeFileSpace = H5Screate_simple(1, &simpleDimension, NULL);
 	attributeId = H5Acreate(globalDatasetId, "serializerResolution", H5T_NATIVE_INT, attributeFileSpace, H5P_DEFAULT, H5P_DEFAULT);
 	H5Awrite(attributeId, H5T_NATIVE_INT, &_config->getSerializeResolution());
@@ -119,10 +119,10 @@ void SequentialSerializer::init( World & world )
 			continue;
 		}
 		hsize_t numEntries[2];
-		numEntries[0] = world.getStaticRaster(i).getNumColorEntries();		
-		numEntries[1] = 4; 
-		hid_t fileSpace = H5Screate_simple(2, numEntries, NULL); 
-		
+		numEntries[0] = world.getStaticRaster(i).getNumColorEntries();
+		numEntries[1] = 4;
+		hid_t fileSpace = H5Screate_simple(2, numEntries, NULL);
+
 		hid_t rasterDatasetId = H5Dcreate(colorTableGroupId, world.getRasterName(i).c_str(), H5T_NATIVE_INT, fileSpace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 		// if not color table continue
 		if(numEntries[0] == 0)
@@ -134,11 +134,11 @@ void SequentialSerializer::init( World & world )
 		hsize_t	offset[2];
     	offset[0] = 0;
 	    offset[1] = 0;
-		
+
 		hsize_t	stride[2];
 		stride[0] = 1;
 		stride[1] = 1;
-	
+
 		hsize_t count[2];
 		count[0] = 1;
 		count[1] = 1;
@@ -157,7 +157,7 @@ void SequentialSerializer::init( World & world )
 			index++;
 			value = (int)(world.getStaticRaster(i).getColorEntry(z)._g);
 			data[index] = value;
-			
+
 			// blue
 			index++;
 			value = (int)(world.getStaticRaster(i).getColorEntry(z)._b);
@@ -176,7 +176,7 @@ void SequentialSerializer::init( World & world )
 
 		free(data);
 		H5Pclose(propertyListId);
-	    H5Sclose(memorySpace);	
+	    H5Sclose(memorySpace);
 		H5Sclose(fileSpace);
 		H5Dclose(rasterDatasetId);
 	}
@@ -191,13 +191,13 @@ void SequentialSerializer::init( World & world )
 	oss << "agents-" << _scheduler.getId() << ".abm";
 
 	_agentsFileId = H5Fcreate(oss.str().c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-	
-	//the real size of the matrix is sqrt(num simulator)*matrixsize	
+
+	//the real size of the matrix is sqrt(num simulator)*matrixsize
 	hsize_t dimensions[2];
 	dimensions[0] = hsize_t(_config->getSize()._height);
 	dimensions[1] = hsize_t(_config->getSize()._width);
 
-	// static rasters	
+	// static rasters
 	for(size_t i=0; i<world.getNumberOfRasters(); i++)
 	{
 		if(!world.rasterExists(i) || !world.rasterToSerialize(i) || world.isRasterDynamic(i))
@@ -206,7 +206,7 @@ void SequentialSerializer::init( World & world )
 		}
 		// TODO 0 o H5P_DEFAULT??
 		hid_t rasterGroupId = H5Gcreate(_fileId, world.getRasterName(i).c_str(), 0, H5P_DEFAULT, H5P_DEFAULT);
-		hid_t fileSpace = H5Screate_simple(2, dimensions, NULL); 
+		hid_t fileSpace = H5Screate_simple(2, dimensions, NULL);
 		hid_t datasetId = H5Dcreate(rasterGroupId, "values", H5T_NATIVE_INT, fileSpace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 		H5Dclose(datasetId);
 		H5Sclose(fileSpace);
@@ -219,21 +219,21 @@ void SequentialSerializer::init( World & world )
 		if(!world.rasterExists(i) || !world.rasterToSerialize(i) || !world.isRasterDynamic(i))
 		{
 			continue;
-		}	
+		}
 		hid_t rasterGroupId = H5Gcreate(_fileId, world.getRasterName(i).c_str(), 0, H5P_DEFAULT, H5P_DEFAULT);
 		for(int i=0; i<=_config->getNumSteps(); i++)
-		{  
+		{
 			if(i%_config->getSerializeResolution()!=0)
 			{
 				continue;
 			}
 			std::ostringstream oss;
 			oss << "step" << i;
-			hid_t stepFileSpace = H5Screate_simple(2, dimensions, NULL); 
+			hid_t stepFileSpace = H5Screate_simple(2, dimensions, NULL);
 			hid_t stepDatasetId = H5Dcreate(rasterGroupId, oss.str().c_str(), H5T_NATIVE_INT, stepFileSpace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 			H5Dclose(stepDatasetId);
 			H5Sclose(stepFileSpace);
-		}	
+		}
 		H5Gclose(rasterGroupId);
 	}
 
@@ -309,23 +309,23 @@ void SequentialSerializer::finishAgentsSerialization( int step)
 	resetCurrentIndexs();
 }
 
-void SequentialSerializer::executeAgentSerialization( const std::string & type, int step)	
+void SequentialSerializer::executeAgentSerialization( const std::string & type, int step)
 {
 	std::map<std::string, int>::iterator itI = _agentIndexMap.find(type);
 
-	int currentIndex = itI->second;	
+	int currentIndex = itI->second;
 
 	hsize_t	offset[1];
     offset[0] = currentIndex;
- 	
+
 	hsize_t	stride[1];
 	stride[0] = 1;
-	
+
 	hsize_t count[1];
 	count[0] = 1;
 
 	IntAttributesMap::iterator it = _intAttributes.find(type);
-	IntMap * attributes = it->second;	
+	IntMap * attributes = it->second;
 	for(IntMap::iterator itM=attributes->begin(); itM!=attributes->end(); itM++)
 	{
 		std::vector<int> * data = itM->second;
@@ -336,7 +336,7 @@ void SequentialSerializer::executeAgentSerialization( const std::string & type, 
 		}
 		hsize_t	block[1];
 		block[0] = data->size();
-		
+
 		hsize_t simpleDimension = data->size();
 		// TODO es repeteix per cada atribut
 		hsize_t newSize[1];
@@ -356,9 +356,9 @@ void SequentialSerializer::executeAgentSerialization( const std::string & type, 
 		H5Sclose(fileSpace);
 		H5Dclose(datasetId);
 	}
-    
+
     FloatAttributesMap::iterator itF = _floatAttributes.find(type);
-	FloatMap * attributesF = itF->second;	
+	FloatMap * attributesF = itF->second;
 	for(FloatMap::iterator itM=attributesF->begin(); itM!=attributesF->end(); itM++)
 	{
 		std::vector<float> * data = itM->second;
@@ -369,7 +369,7 @@ void SequentialSerializer::executeAgentSerialization( const std::string & type, 
 		}
 		hsize_t	block[1];
 		block[0] = data->size();
-		
+
 		hsize_t simpleDimension = data->size();
 		// TODO es repeteix per cada atribut
 		hsize_t newSize[1];
@@ -389,15 +389,15 @@ void SequentialSerializer::executeAgentSerialization( const std::string & type, 
 		H5Sclose(fileSpace);
 		H5Dclose(datasetId);
 	}
-	
+
 	StringAttributesMap::iterator itS = _stringAttributes.find(type);
-	StringMap * attributesS = itS->second;	
+	StringMap * attributesS = itS->second;
 	for(StringMap::iterator itM=attributesS->begin(); itM!=attributesS->end(); itM++)
 	{
 		std::vector<std::string> * data = itM->second;
 		hsize_t	block[1];
 		block[0] = data->size();
-		
+
 		hsize_t simpleDimension = data->size();
 		// TODO es repeteix per cada atribut
 		hsize_t newSize[1];
@@ -414,7 +414,13 @@ void SequentialSerializer::executeAgentSerialization( const std::string & type, 
 		hid_t idType = H5Tcopy(H5T_C_S1);
 		H5Tset_size (idType, H5T_VARIABLE);
   		hid_t memorySpace = H5Screate_simple(1, &simpleDimension, 0);
-		H5Dwrite(datasetId, idType, memorySpace, fileSpace, H5P_DEFAULT, &(data->at(0)));
+        // MRJ: Got in trouble with the existing call, since it was passing a pointer
+        // not a double pointer!
+        // See this discussion on stack overflow:
+        //
+        // http://stackoverflow.com/questions/581209/how-to-best-write-out-a-stdvector-stdstring-container-to-a-hdf5-dataset
+        const char* s = data->at(0).c_str();
+		H5Dwrite(datasetId, idType, memorySpace, fileSpace, H5P_DEFAULT, &s);
 		data->clear();
 
 		H5Sclose(memorySpace);
@@ -431,7 +437,7 @@ void SequentialSerializer::addStringAttribute( const std::string & type, const s
 	std::vector<std::string> * stringVector = itS->second;
 	stringVector->push_back(value);
 }
-	
+
 void SequentialSerializer::addIntAttribute( const std::string & type, const std::string & key, int value )
 {
 	IntAttributesMap::iterator it = _intAttributes.find(type);
@@ -509,7 +515,7 @@ void SequentialSerializer::registerType( Agent * agent )
 		oss<<"step"<<i;
 		hid_t stepGroup = H5Gcreate(agentTypeGroup, oss.str().c_str(),  0, H5P_DEFAULT, H5P_DEFAULT);
 		for(Agent::AttributesList::iterator it=agent->beginIntAttributes(); it!=agent->endIntAttributes(); it++)
-		{	
+		{
 			log_DEBUG(logName.str(), "\tnew int attribute: " << *it);
 			newTypeIntMap->insert( make_pair(*it, new std::vector<int>() ));
 			hid_t idDataset= H5Dcreate(stepGroup, (*it).c_str(), H5T_NATIVE_INT, agentFileSpace, H5P_DEFAULT, propertyListId, H5P_DEFAULT);
@@ -518,15 +524,15 @@ void SequentialSerializer::registerType( Agent * agent )
                 std::stringstream ossErr;
         		ossErr << "SequentialSerializer::registerType - dataset not created for agent: " << agent << " step group: " << oss.str() << " and int attribute: " << *it;
         		throw Exception(ossErr.str());
-            }   
+            }
 			H5Dclose(idDataset);
-		}      
-        
+		}
+
         for(Agent::AttributesList::iterator it=agent->beginFloatAttributes(); it!=agent->endFloatAttributes(); it++)
-		{	
+		{
 			log_DEBUG(logName.str(), "\tnew float attribute: " << *it);
 			newTypeFloatMap->insert( make_pair(*it, new std::vector<float>() ));
-			hid_t idDataset= H5Dcreate(stepGroup, (*it).c_str(), H5T_NATIVE_FLOAT, agentFileSpace, H5P_DEFAULT, propertyListId, H5P_DEFAULT);    
+			hid_t idDataset= H5Dcreate(stepGroup, (*it).c_str(), H5T_NATIVE_FLOAT, agentFileSpace, H5P_DEFAULT, propertyListId, H5P_DEFAULT);
             if(idDataset<0)
             {
                 std::stringstream ossErr;
@@ -536,14 +542,14 @@ void SequentialSerializer::registerType( Agent * agent )
 			H5Dclose(idDataset);
 		}
 
-		
+
 		hid_t idType = H5Tcopy(H5T_C_S1);
 		H5Tset_size (idType, H5T_VARIABLE);
 		for(Agent::AttributesList::iterator it=agent->beginStringAttributes(); it!=agent->endStringAttributes(); it++)
-		{		
+		{
 			log_DEBUG(logName.str(), "\tnew string attribute: " << *it);
 			newTypeStringMap->insert( make_pair(*it, new std::vector<std::string>() ));
-			hid_t idDataset= H5Dcreate(stepGroup, (*it).c_str(), idType, agentFileSpace, H5P_DEFAULT, propertyListId, H5P_DEFAULT);  
+			hid_t idDataset= H5Dcreate(stepGroup, (*it).c_str(), idType, agentFileSpace, H5P_DEFAULT, propertyListId, H5P_DEFAULT);
             if(idDataset<0)
             {
                 std::stringstream ossErr;
@@ -600,17 +606,17 @@ void SequentialSerializer::serializeRaster( const StaticRaster & raster, const s
 
 	const hsize_t boundariesWidth = _scheduler.getBoundaries()._size._width;
 	const hsize_t boundariesHeight = _scheduler.getBoundaries()._size._height;
- 
+
 	hsize_t	block[2];
 	block[0] = boundariesHeight;
 	block[1] = boundariesWidth;
-	
+
 	int * data = (int *) malloc(sizeof(int)*block[0]*block[1]);
 	size_t index = 0;
 	for(size_t y=0; y<boundariesHeight; y++)
 	{
 		for(size_t x=0; x<boundariesWidth; x++)
-		{	
+		{
 			log_EDEBUG(logName.str(), "index: " << x << "/" << y << " - " << index);
 			data[index] = raster.getValue(Point2D<int>(x,y));
 			log_EDEBUG(logName.str(), "value: " << data[index]);
@@ -625,7 +631,7 @@ void SequentialSerializer::serializeRaster( const StaticRaster & raster, const s
 
 	free(data);
 	H5Pclose(propertyListId);
-    H5Sclose(memorySpace);	
+    H5Sclose(memorySpace);
 	H5Sclose(fileSpace);
 	H5Dclose(dataSetId);
 	log_EDEBUG(logName.str(), "serializing raster: " << datasetKey << " done");
@@ -642,4 +648,3 @@ void SequentialSerializer::serializeRasters(int step)
 }
 
 } // namespace Engine
-
