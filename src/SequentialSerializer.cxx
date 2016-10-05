@@ -327,12 +327,12 @@ void SequentialSerializer::executeAgentSerialization( const std::string & type, 
 
 	IntAttributesMap::iterator it = _intAttributes.find(type);
 	IntMap * attributes = it->second;
-    std::cout << "Serializing agent data" << std::endl;
-    std::cout << "\tInteger attributes" << std::endl;
+    //std::cout << "Serializing agent data" << std::endl;
+    //std::cout << "\tInteger attributes" << std::endl;
 	for(IntMap::iterator itM=attributes->begin(); itM!=attributes->end(); itM++)
 	{
 		std::vector<int> * data = itM->second;
-        std::cout << "\tAddress: @" << data << std::endl;
+        //std::cout << "\tAddress: @" << data << std::endl;
         if ( data == nullptr ) {
             std::ostringstream exceptionMessage;
             exceptionMessage << "libPandora.so Runtime Error" << std::endl;
@@ -346,10 +346,10 @@ void SequentialSerializer::executeAgentSerialization( const std::string & type, 
 		// nothing to serialize
 		if(data->size()==0)
 		{
-            std::cout << "\t No integer attributes found" << std::endl;
+            //std::cout << "\t No integer attributes found" << std::endl;
 			return;
 		}
-        std::cout << "\t " << data->size() << " integer attributes found" << std::endl;
+        //std::cout << "\t " << data->size() << " integer attributes found" << std::endl;
 
 		hsize_t	block[1];
 		block[0] = data->size();
@@ -361,7 +361,7 @@ void SequentialSerializer::executeAgentSerialization( const std::string & type, 
 
 		std::ostringstream oss;
 		oss << type << "/step" << step << "/" << itM->first;
-        std::cout << "\t storing dataset: " << oss.str().c_str() << std::endl;
+        //std::cout << "\t storing dataset: " << oss.str().c_str() << std::endl;
 		hid_t datasetId = H5Dopen(_agentsFileId, oss.str().c_str(), H5P_DEFAULT);
 		H5Dset_extent( datasetId, newSize);
 		hid_t fileSpace = H5Dget_space(datasetId);
@@ -373,11 +373,10 @@ void SequentialSerializer::executeAgentSerialization( const std::string & type, 
 		H5Sclose(memorySpace);
 		H5Sclose(fileSpace);
 		H5Dclose(datasetId);
-        std::cout << "\t done!" << std::endl;
-	}
+        }
 
-    std::cout << "Serializing agent data" << std::endl;
-    std::cout << "\tFloat attributes" << std::endl;
+    //std::cout << "Serializing agent data" << std::endl;
+    //std::cout << "\tFloat attributes" << std::endl;
     FloatAttributesMap::iterator itF = _floatAttributes.find(type);
 	FloatMap * attributesF = itF->second;
 	for(FloatMap::iterator itM=attributesF->begin(); itM!=attributesF->end(); itM++)
@@ -411,14 +410,14 @@ void SequentialSerializer::executeAgentSerialization( const std::string & type, 
 		H5Dclose(datasetId);
 	}
 
-    std::cout << "Serializing agent data" << std::endl;
-    std::cout << "\tString attributes" << std::endl;
+    //std::cout << "Serializing agent data" << std::endl;
+    //std::cout << "\tString attributes" << std::endl;
 	StringAttributesMap::iterator itS = _stringAttributes.find(type);
 	StringMap * attributesS = itS->second;
 	for(StringMap::iterator itM=attributesS->begin(); itM!=attributesS->end(); itM++)
 	{
 		std::vector<std::string> * data = itM->second;
-        std::cout << "\tAddress: @" << data << std::endl;
+        //std::cout << "\tAddress: @" << data << std::endl;
         if ( data == nullptr ) {
             std::ostringstream exceptionMessage;
             exceptionMessage << "libPandora.so Runtime Error" << std::endl;
@@ -431,10 +430,10 @@ void SequentialSerializer::executeAgentSerialization( const std::string & type, 
 
         if(data->size()==0)
 		{
-            std::cout << "\t No string attributes found" << std::endl;
+            //std::cout << "\t No string attributes found" << std::endl;
 			return;
 		}
-        std::cout << "\t " << data->size() << " string attributes found" << std::endl;
+        //std::cout << "\t " << data->size() << " string attributes found" << std::endl;
 
 		hsize_t	block[1];
 		block[0] = data->size();
@@ -447,7 +446,7 @@ void SequentialSerializer::executeAgentSerialization( const std::string & type, 
 
 		std::ostringstream oss;
 		oss << type << "/step" << step << "/" << itM->first;
-        std::cout << "\t storing dataset: " << oss.str().c_str() << std::endl;
+        //std::cout << "\t storing dataset: " << oss.str().c_str() << std::endl;
 		hid_t datasetId = H5Dopen(_agentsFileId, oss.str().c_str(), H5P_DEFAULT);
 		H5Dset_extent( datasetId, newSize);
 		hid_t fileSpace = H5Dget_space(datasetId);
