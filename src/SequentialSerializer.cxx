@@ -8,6 +8,7 @@
 #include <Logger.hxx>
 #include <StaticRaster.hxx>
 #include <Config.hxx>
+#include <algorithm>
 
 namespace Engine
 {
@@ -326,14 +327,30 @@ void SequentialSerializer::executeAgentSerialization( const std::string & type, 
 
 	IntAttributesMap::iterator it = _intAttributes.find(type);
 	IntMap * attributes = it->second;
+    std::cout << "Serializing agent data" << std::endl;
+    std::cout << "\tInteger attributes" << std::endl;
 	for(IntMap::iterator itM=attributes->begin(); itM!=attributes->end(); itM++)
 	{
 		std::vector<int> * data = itM->second;
+        std::cout << "\tAddress: @" << data << std::endl;
+        if ( data == nullptr ) {
+            std::ostringstream exceptionMessage;
+            exceptionMessage << "libPandora.so Runtime Error" << std::endl;
+            exceptionMessage << "File " << __FILE__ << ":" << __LINE__;
+            exceptionMessage << "SequentialSerializer::executeAgentSerialization()" << std::endl;
+            exceptionMessage << "\t Integer Attribute " << itM->first << std::endl;
+            exceptionMessage << "\t is not properly allocated!" << std::endl;
+            throw std::runtime_error("Pandora: ");
+        }
+
 		// nothing to serialize
 		if(data->size()==0)
 		{
+            std::cout << "\t No integer attributes found" << std::endl;
 			return;
 		}
+        std::cout << "\t " << data->size() << " integer attributes found" << std::endl;
+
 		hsize_t	block[1];
 		block[0] = data->size();
 
@@ -344,6 +361,7 @@ void SequentialSerializer::executeAgentSerialization( const std::string & type, 
 
 		std::ostringstream oss;
 		oss << type << "/step" << step << "/" << itM->first;
+        std::cout << "\t storing dataset: " << oss.str().c_str() << std::endl;
 		hid_t datasetId = H5Dopen(_agentsFileId, oss.str().c_str(), H5P_DEFAULT);
 		H5Dset_extent( datasetId, newSize);
 		hid_t fileSpace = H5Dget_space(datasetId);
@@ -355,8 +373,11 @@ void SequentialSerializer::executeAgentSerialization( const std::string & type, 
 		H5Sclose(memorySpace);
 		H5Sclose(fileSpace);
 		H5Dclose(datasetId);
+        std::cout << "\t done!" << std::endl;
 	}
 
+    std::cout << "Serializing agent data" << std::endl;
+    std::cout << "\tFloat attributes" << std::endl;
     FloatAttributesMap::iterator itF = _floatAttributes.find(type);
 	FloatMap * attributesF = itF->second;
 	for(FloatMap::iterator itM=attributesF->begin(); itM!=attributesF->end(); itM++)
@@ -390,11 +411,31 @@ void SequentialSerializer::executeAgentSerialization( const std::string & type, 
 		H5Dclose(datasetId);
 	}
 
+    std::cout << "Serializing agent data" << std::endl;
+    std::cout << "\tString attributes" << std::endl;
 	StringAttributesMap::iterator itS = _stringAttributes.find(type);
 	StringMap * attributesS = itS->second;
 	for(StringMap::iterator itM=attributesS->begin(); itM!=attributesS->end(); itM++)
 	{
 		std::vector<std::string> * data = itM->second;
+        std::cout << "\tAddress: @" << data << std::endl;
+        if ( data == nullptr ) {
+            std::ostringstream exceptionMessage;
+            exceptionMessage << "libPandora.so Runtime Error" << std::endl;
+            exceptionMessage << "File " << __FILE__ << ":" << __LINE__;
+            exceptionMessage << "SequentialSerializer::executeAgentSerialization()" << std::endl;
+            exceptionMessage << "\t string Attribute " << itM->first << std::endl;
+            exceptionMessage << "\t is not properly allocated!" << std::endl;
+            throw std::runtime_error("Pandora: ");
+        }
+
+        if(data->size()==0)
+		{
+            std::cout << "\t No string attributes found" << std::endl;
+			return;
+		}
+        std::cout << "\t " << data->size() << " string attributes found" << std::endl;
+
 		hsize_t	block[1];
 		block[0] = data->size();
 
@@ -406,7 +447,7 @@ void SequentialSerializer::executeAgentSerialization( const std::string & type, 
 
 		std::ostringstream oss;
 		oss << type << "/step" << step << "/" << itM->first;
-
+        std::cout << "\t storing dataset: " << oss.str().c_str() << std::endl;
 		hid_t datasetId = H5Dopen(_agentsFileId, oss.str().c_str(), H5P_DEFAULT);
 		H5Dset_extent( datasetId, newSize);
 		hid_t fileSpace = H5Dget_space(datasetId);
@@ -414,14 +455,22 @@ void SequentialSerializer::executeAgentSerialization( const std::string & type, 
 		hid_t idType = H5Tcopy(H5T_C_S1);
 		H5Tset_size (idType, H5T_VARIABLE);
   		hid_t memorySpace = H5Screate_simple(1, &simpleDimension, 0);
-        // MRJ: Got in trouble with the existing call, since it was passing a pointer
-        // not a double pointer!
+
         // See this discussion on stack overflow:
         //
         // http://stackoverflow.com/questions/581209/how-to-best-write-out-a-stdvector-stdstring-container-to-a-hdf5-dataset
-        const char* s = data->at(0).c_str();
-		H5Dwrite(datasetId, idType, memorySpace, fileSpace, H5P_DEFAULT, &s);
-		data->clear();
+        //
+        // we were passing pointers to std::string and for whatever the reason that is no longer
+        // a good way of doing things. We're creating a very ugly temporary, but somebody
+        // with more insight in the design of Pandora will probably be optimising it out very quickly.
+        std::vector<const char*> chars;
+         for (const auto& str: *data) {
+           chars.push_back(str.data());
+         }
+
+		H5Dwrite(datasetId, idType, memorySpace, fileSpace, H5P_DEFAULT, chars.data());
+
+        data->clear();
 
 		H5Sclose(memorySpace);
 		H5Sclose(fileSpace);
