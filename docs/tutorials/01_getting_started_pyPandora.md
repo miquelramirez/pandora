@@ -120,7 +120,7 @@ constructing MyWorld
 simulation finished
 ```
 
-MyWorld is constructed, but the model is not executed. To achieve this, we have to add these lines to our main method:
+**MyWorld** is constructed, but the model is not executed. To achieve this, we have to add these lines to our main method:
 
 ```Python
     myWorld.initialize()
@@ -172,12 +172,13 @@ Now is time to fill MyWorld. Go to createRasters method, and add these lines:
 The first line tells World that it needs to register a new dynamic raster map (it can be modified). The first parameter states that this raster map is called resources, and the second one that it must be stored in ```results.h5``` file.
 The second line sets the initialized values of the entire raster map. The first two parameters are the minimum and maximum value for the entire world, and the third one is the default init value.
 
-If you execute again 'tutorial_pyPandora.py', and check 'results.h5' with cassandra you will realize that a 'resources' raster map has been created. Try to 'play' the simulation; the default behavior for a raster map is to increate the value of each cell 1 unit until reaching the maximum value, so if you check the step number 9 you can check that every cell has a value of '9'. (LINK A figure_01.png)
+If you execute again ```tutorial_pyPandora.py```, and check ```results.h5``` with ```cassandra``` you will see that a ```resources``` raster map has been created. Try to *play* the simulation; the default behavior for a raster map is to increate the value of each cell 1 unit until reaching the maximum value, so if you check the step number 9 you can check that every cell has a value of ```9```. (LINK A figure_01.png)
 
-5) Define MyAgent
+## Define MyAgent
 
-Now that MyWorld is working we will need to define our own MyAgent. Start defining MyAgent as a child class of Agent:
+Now that **MyWorld** is working we will need to define our own **MyAgent**. Start defining **MyAgent** as a child class of **Agent**:
 
+```Python
 class MyAgent(Agent):
     def __init__(self, id):
         Agent.__init__( self, id)
@@ -190,20 +191,24 @@ class MyAgent(Agent):
     def serialize(self):
         print('serializing MyAgent: ',self.id)
         return
+```
 
 This class will have three methods:
-    1) __init__ - The constructor, just like we did with MyWorld. It only gets one parameter, a string that will be used as the 'id' of the agent. This attribute is very important: every instance of Agent must have a unique id. If this is not the case, Pandora will be confused about which agent is every instance.
-    2) updateState - This method is the core of a simple Pandora Agent. It is executed every time step, and is the place where the internal state of Agent is modified.
-    3) serialize - In order to analyze the results, we will need to store part of the internal state of an Agent every time step. This is done in this method, but it will be empty by now. By default, Pandora always serializes the id and position of an agent so we don't need to do that. Additionally, a variable called 'exists' that checks whether this agent is alive.
+    1) ```__init__``` - The constructor, just like we did with **MyWorld**. It only gets one parameter, a string that will be used as the 'id' of the agent. This attribute is very important: every instance of **Agent** must have a unique ```id```. If this is not the case, Pandora will be confused about which agent is every instance.
+    2) ```updateState``` - This method is the core of a simple Pandora Agent. It is executed every time step, and is the place where the internal state of Agent is modified.
+    3) ```serialize``` - In order to analyze the results, we will need to store part of the internal state of an Agent every time step. This is done in this method, but it will be empty by now. By default, Pandora always serializes the ```id``` and ```position``` of an agent so we don't need to do that. Additionally, a variable called *exists* keeps track whether this agent is alive (i.e. active).
 
 If we execute this code we will get an error saying that Agent is not found. We have to add it to the classes included in our file:
 
+```Python
 from pyPandora import Config, World, Agent, SizeInt
+```
 
-6) Define behavior
+## Define behavior
 
-We will write some basic code inside updateState to modify its state. For now we will basically move our Agents randomly through the space defined in MyWorld:
+We will write some basic code inside ```updateState``` to modify its state. For now we will basically move our **Agents** randomly through the space defined in **MyWorld**:
 
+```Python
     def updateState(self):
         print('updating state of: ',self.id)
         newPosition = self.position
@@ -212,25 +217,32 @@ We will write some basic code inside updateState to modify its state. For now we
 
         if self.getWorld().checkPosition(newPosition):
             self.position = newPosition
+```
 
-You can see that we have created a local variable called 'newPosition'. It is initialized to the current location of MyAgent (self.position), but we modify randomly these values with a value going of -1, 0 or 1. Finally, we check if the position is correct in terms of MyWorld (to ensure that it is inside boundaries), and we update self.position. It is worth to note that newPosition is an instance of class Point2DInt.
+You can see that we have created a local variable called ```newPosition```. It is initialized to the current location of **MyAgent** (```self.position```), but we modify randomly these values with a value going of ```-1```, ```0``` or ```1```. Finally, we check if the position is correct in terms of **MyWorld** (to ensure that it is inside boundaries), and we update ```self.position```. It is worth to note that ```newPosition``` is an instance of class **Point2DInt**.
 
 We also have to import random functionaly from Python core libraries:
 
+```Python
 import sys, random
+```
 
-7) Creating agents
-We have everything ready for our first Agent-Based Model, but we have to create some instances of our brand new little MyAgent class. As stated before, we will add them in the 'createAgents' method of MyWorld:
+## Creating agents
 
+We have everything ready for our first Agent-Based Model, but we have to create some instances of our brand new little **MyAgent** class. As stated before, we will add them in the ```createAgents``` method of **MyWorld**:
+
+```Python
     def createAgents(self):
         print('creating agents')
         for i in range (0, 10):
             newAgent = MyAgent('MyAgent_'+str(i))
             self.addAgent(newAgent)
             newAgent.setRandomPosition()
+```
 
-Pretty straightforward; with these lines we are creating 10 agents (called MyAgent_0, MyAgent_1, until MyAgent_9), adding them to the World, and setting initial positions for all of them.
-Everything ready! If we execute again tutorial_pyPandora.py we will get a list of messages communicating us that 10 agents have been created, and a sequence of 'updateState' and 'serialize' methods have been executed. If we check 'results.h5' with cassandra we should see something like Figure 2 (LINK figure_02.png)
+Pretty straightforward; with these lines we are creating 10 agents (called ```MyAgent_0```, ```MyAgent_1```, up to ```MyAgent_9```), adding them to the **World**, and setting initial positions for all of them.
+
+Everything is now ready! If we execute again ```tutorial_pyPandora.py``` we will get a list of messages communicating us that 10 agents have been created, and a sequence of ```updateState``` and ```serialize``` methods have been executed. If we check ```results.h5``` with cassandra we should see something like Figure 2 (LINK figure_02.png)
 
 8) Gathering resources
 To finish this tutorial we will modify MyAgent to gather 'resources' from MyWorld, and serialize this value. We go again to the 'updateState' method and add these lines:
