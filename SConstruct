@@ -1,8 +1,26 @@
+from __future__ import print_function
 
 version = '0.0.1'
 
 import os, platform, SCons
 from distutils.version import LooseVersion
+
+
+def setup_ld_conf(libdirs) :
+    import sys
+
+    conf_file = '/etc/ld.so.conf.d/pandora.conf'
+
+    print( "Creating .conf file: {}".format(conf_file ) )
+
+    with open( conf_file, 'w' ) as outstream :
+        for dirname in libdirs :
+            full_path = os.path.abspath( dirname )
+            print( "Adding {}".format( full_path ) )
+            print( full_path, file=outstream )
+
+    print( "Running ldconfig..." )
+    os.system( 'ldconfig' )
 
 vars = Variables('custom.py')
 vars.Add(BoolVariable('debug', 'compile with debug flags', 'no'))
@@ -142,8 +160,11 @@ cassandraCompilation = env.Command("bin/cassandra", "", "cd cassandra && /usr/li
 if platform.system()=='Darwin':
     cassandraCompilation = env.Command("bin/cassandra", "", "cd cassandra && qmake cassandra_osx.pro && make")
 
+# ld setup
+ldSetup = env.Command('/etc/ld.so.conf.d/pandora.conf', [sharedLib, sharedPyLib], lambda target, source, env : setup_ld_conf([installLibDir]) )
+
 # final targets
 Default(sharedLib)
 Default(sharedPyLib)
 env.Alias('cassandra', cassandraCompilation)
-env.Alias('install', [cassandraCompilation, sharedLib, sharedPyLib, installedLib, installedPyLib, installedHeaders, installedAnalysisHeaders, installBin, installShare, installMpiStub])
+env.Alias('install', [ldSetup, cassandraCompilation, sharedLib, sharedPyLib, installedLib, installedPyLib, installedHeaders, installedAnalysisHeaders, installBin, installShare, installMpiStub])
