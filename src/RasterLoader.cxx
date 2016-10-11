@@ -5,19 +5,19 @@
  * BARCELONA SUPERCOMPUTING CENTRE - CENTRO NACIONAL DE SUPERCOMPUTACIÓN
  * http://www.bsc.es
 
- * This file is part of Pandora Library. This library is free software; 
+ * This file is part of Pandora Library. This library is free software;
  * you can redistribute it and/or modify it under the terms of the
  * GNU General Public License as published by the Free Software Foundation;
  * either version 3.0 of the License, or (at your option) any later version.
- * 
+ *
  * Pandora is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public 
+ *
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 #include <RasterLoader.hxx>
@@ -53,7 +53,7 @@ void RasterLoader::fillGDALRaster( StaticRaster & raster, const std::string & fi
 
 	GDALAllRegister();
 	GDALDataset * dataset = (GDALDataset *)GDALOpen(fileName.c_str(), GA_ReadOnly );
-	
+
 	if(!dataset)
 	{
 		std::stringstream oss;
@@ -79,7 +79,7 @@ void RasterLoader::fillGDALRaster( StaticRaster & raster, const std::string & fi
 	{
 		GDALComputeRasterMinMax((GDALRasterBandH)band, TRUE, minMaxValues);
 	}
-	
+
 	float * pafScanline = (float *)CPLMalloc(sizeof(float)*(boundaries._size._width*boundaries._size._height));
 	band->RasterIO( GF_Read, boundaries._origin._x, boundaries._origin._y, boundaries._size._width, boundaries._size._height, pafScanline, boundaries._size._width, boundaries._size._height, GDT_Float32, 0, 0 );
 
@@ -99,7 +99,7 @@ void RasterLoader::fillGDALRaster( StaticRaster & raster, const std::string & fi
 	}
 
 	CPLFree(pafScanline);
-	log_DEBUG(logName.str(), "done, update minmax values");	
+	log_DEBUG(logName.str(), "done, update minmax values");
 	raster.updateMinMaxValues();
 
 	// if dynamic, copy to maxValues
@@ -116,7 +116,7 @@ void RasterLoader::fillGDALRaster( StaticRaster & raster, const std::string & fi
 	{
 		raster.setColorTable(true, colorTable->GetColorEntryCount());
 		for(int i=0; i<colorTable->GetColorEntryCount(); i++)
-		{ 	
+		{
 			GDALColorEntry newEntry;
 			if(colorTable->GetColorEntryAsRGB(i, &newEntry))
 			{
@@ -124,9 +124,9 @@ void RasterLoader::fillGDALRaster( StaticRaster & raster, const std::string & fi
 			}
 		}
 	}
-	log_DEBUG(logName.str(), "finished, closing");	
+	log_DEBUG(logName.str(), "finished, closing");
 	GDALClose(dataset);
-	log_DEBUG(logName.str(), "done!");	
+	log_DEBUG(logName.str(), "done!");
 }
 
 void RasterLoader::fillHDF5RasterDirectPath( StaticRaster & raster, const std::string & fileName, const std::string & pathToData, World * world )
@@ -149,14 +149,14 @@ void RasterLoader::fillHDF5RasterDirectPath( StaticRaster & raster, const std::s
 	hsize_t dims[2];
 	H5Sget_simple_extent_dims(dataspaceId, dims, NULL);
 	H5Sclose(dataspaceId);
-	
+
 	if(world && (dims[0]!=world->getConfig().getSize()._width || dims[1]!=world->getConfig().getSize()._height))
 	{
 		std::stringstream oss;
 		oss << "RasterLoader::fillHDF5RasterDirectPath - file: " << fileName << " and dataset: " << pathToData<< " with size: " << dims[0] << "/" << dims[1] << " different from defined size: " << world->getConfig().getSize() << std::endl;
 		throw Engine::Exception(oss.str());
 	}
-	
+
 	int * dset_data = 0;
 	if(world)
 	{
@@ -166,7 +166,7 @@ void RasterLoader::fillHDF5RasterDirectPath( StaticRaster & raster, const std::s
 	else
 	{
 		dset_data = (int*)malloc(sizeof(int)*dims[0]*dims[1]);
-		raster.resize(Size<int>(dims[0], dims[1]));
+		raster.resize(Size<int>(dims[1], dims[0]));
 	}
 
 	H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data);
@@ -193,18 +193,18 @@ void RasterLoader::fillHDF5RasterDirectPath( StaticRaster & raster, const std::s
 		{
 			for(size_t x=0; x<dims[1]; x++)
 			{
-				raster._values[x][y] = dset_data[index];	
+				raster._values[x][y] = dset_data[index];
 				++index;
 			}
 		}
 	}
 	free(dset_data);
 
-    int lastIndex = pathToData.find_last_of("/"); 
-    std::string rasterName = pathToData.substr(0, lastIndex); 
+    int lastIndex = pathToData.find_last_of("/");
+    std::string rasterName = pathToData.substr(0, lastIndex);
 	std::ostringstream oss2;
-	oss2 << "/colorTables/" << rasterName; 
-    
+	oss2 << "/colorTables/" << rasterName;
+
     H5E_auto2_t oldfunc;
     void *old_client_data;
     H5Eget_auto(H5E_DEFAULT, &oldfunc, &old_client_data);
@@ -213,7 +213,7 @@ void RasterLoader::fillHDF5RasterDirectPath( StaticRaster & raster, const std::s
     /* Turn off error handling */
     H5Eset_auto(H5E_DEFAULT, NULL, NULL);
 	hid_t colorTableId = H5Dopen(fileId, oss2.str().c_str(), H5P_DEFAULT);
-    
+
     /* Restore previous error handler */
     H5Eset_auto(H5E_DEFAULT, oldfunc, old_client_data);
     std::cout << "checking: " << oss2.str() << " -> " << colorTableId << std::endl;
@@ -243,7 +243,7 @@ void RasterLoader::fillHDF5RasterDirectPath( StaticRaster & raster, const std::s
     }
 	H5Fclose(fileId);
 	raster.updateMinMaxValues();
-	
+
 	// if dynamic, copy to maxValues
 	DynamicRaster * dynamicRaster = dynamic_cast<DynamicRaster*>(&raster);
 	if(dynamicRaster)
@@ -262,11 +262,10 @@ void RasterLoader::fillHDF5Raster( StaticRaster & raster, const std::string & fi
 }
 
 void RasterLoader::fillHDF5Raster( StaticRaster & raster, const std::string & fileName, const std::string & rasterName, World * world )
-{	
+{
     std::ostringstream oss;
 	oss << "/" << rasterName << "/values";
     fillHDF5RasterDirectPath(raster, fileName, oss.str(), world);
 }
 
 } // namespace Engine
-
