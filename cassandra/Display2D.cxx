@@ -14,10 +14,10 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *  
- * You should have received a copy of the GNU General Public 
+ *
+ * You should have received a copy of the GNU General Public
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 #include <Display2D.hxx>
@@ -71,8 +71,13 @@ void Display2D::resetView()
         // qpixmap has a maximum size of 32767x32767; 100.000 seems reasonable
         if(maxExtent*_sizePixel>100000)
         {
-            _sizePixel = (_sizePixel*maxExtent)/10000;
+            _sizePixel = (_sizePixel*maxExtent)/100000;
         }
+
+		// For the sake of efficiency, we limit the image size to a maximum of 2048x2048 pixels
+		size_t pixels = _sizePixel * maxExtent;
+		float factor = 2048.0f / (float)pixels;
+		_sizePixel = std::min( 50, (int)std::floor(50.0f*factor));
 
 	    _zoom = 600.0f/float(std::max(_simulationRecord->getSize()._width, _simulationRecord->getSize()._height));
     }
@@ -80,7 +85,7 @@ void Display2D::resetView()
     {
 	    _zoom = 1.0f;
     }
-    std::cout << "size pixel: " << _sizePixel << std::endl;
+    std::cout << "size pixel: " << _sizePixel << " zoom: " << _zoom << std::endl;
 }
 
 void Display2D::setSimulationRecord( Engine::SimulationRecord * simulationRecord )
@@ -107,11 +112,12 @@ void Display2D::paintEvent(QPaintEvent *event)
 		return;
 	}
 	QPixmap imageToDraw(QSize(_sizePixel*_simulationRecord->getSize()._width, _sizePixel*_simulationRecord->getSize()._height));
+	std::cout << "Size of output pixmap: " << imageToDraw.size().width() << "x" << imageToDraw.size().height() << std::endl;
 	QPainter painter(&imageToDraw);
     painter.setPen(Qt::NoPen);
 
 	imageToDraw.fill(QColor("#E6D298"));
-	
+
     if(!_orderedRasters.empty())
 	{
 		for(int i=0; i<_simulationRecord->getSize()._width; i++)
@@ -125,7 +131,7 @@ void Display2D::paintEvent(QPaintEvent *event)
 					RasterConfiguration * rasterConfig = ProjectConfiguration::instance()->getRasterConfig(*it);
 					Engine::StaticRaster & raster(_simulationRecord->getRasterTmp(*it, _viewedStep));
 					int value = raster.getValue(Engine::Point2D<int>(i,j));
-			
+
 					QBrush brush(Qt::SolidPattern);
 					if(rasterConfig->isTransparentEnabled() && value==rasterConfig->getTransparentValue())
 					{
@@ -159,11 +165,11 @@ void Display2D::paintEvent(QPaintEvent *event)
                     if(!rasterConfig->showValues())
                     {
                         break;
-                    }     
+                    }
                     painter.setPen(Qt::black);
                     painter.setFont(QFont("Arial", 48));
                     QString valueStr = QString::number(value);
-                    QFont previousFont = painter.font();  
+                    QFont previousFont = painter.font();
                     QFont font = painter.font();
                     int pixelSize = _sizePixel*0.75f;;
 
@@ -185,10 +191,10 @@ void Display2D::paintEvent(QPaintEvent *event)
 			}
 		}
 	}
-	
+
     if(!_showAgents)
 	{
-		QPainter screenPainter(this);	
+		QPainter screenPainter(this);
 		screenPainter.save();
 		screenPainter.drawPixmap(_offset, imageToDraw.scaled(getRealSize()));
 		screenPainter.restore();
@@ -205,7 +211,7 @@ void Display2D::paintEvent(QPaintEvent *event)
 		for(Engine::SimulationRecord::AgentRecordsMap::const_iterator it= _simulationRecord->beginAgents(itType); it!=_simulationRecord->endAgents(itType); it++)
 		{
 			if(agentConfig->useIcon() && !agentConfig->getFileName2D().empty())
-			{	
+			{
 				Engine::AgentRecord * agent = it->second;
 				bool exists = agent->getInt(_viewedStep/_simulationRecord->getFinalResolution(), "exists");
 				if(exists)
@@ -213,7 +219,7 @@ void Display2D::paintEvent(QPaintEvent *event)
 					int x = agent->getInt(_viewedStep/_simulationRecord->getFinalResolution(), "x");
 					int y = agent->getInt(_viewedStep/_simulationRecord->getFinalResolution(), "y");
 					int size = (float)_zoom*agentConfig->getSize();
-					int xPos = x*_zoom - size/2;						
+					int xPos = x*_zoom - size/2;
 					int yPos = y*_zoom - size/2;
 					agentConfig->getIcon().paint(&painter, QRect(xPos, yPos, size, size));
 				}
@@ -254,7 +260,7 @@ void Display2D::paintEvent(QPaintEvent *event)
 					    	painter.setBrush(brush);
                         }
                         else if(agent->isFloat(_state))
-                        {   
+                        {
                             // we put this call between try/catch in order to avoid crashes about painting state in agents that don't have it
 	    					float value = 0;
 		    				try
@@ -295,7 +301,7 @@ void Display2D::paintEvent(QPaintEvent *event)
                     painter.setFont(QFont("Arial", 48));
                     QFontMetrics fm(painter.font());
                     if(agent->isStr(_state))
-                    {  
+                    {
                         std::string value = agent->getStr(_viewedStep/_simulationRecord->getFinalResolution(), _state);
                         painter.drawText(_sizePixel*x-5*(size-1)-fm.width(value.c_str())/2,_sizePixel*y-5*(size-1), value.c_str());
                         painter.setPen(Qt::NoPen);
@@ -313,7 +319,7 @@ void Display2D::paintEvent(QPaintEvent *event)
                         float value = agent->getFloat(_viewedStep/_simulationRecord->getFinalResolution(), _state);
                         valueStr = QString::number(value, 'f', 2);
                     }
-                    QFont previousFont = painter.font();  
+                    QFont previousFont = painter.font();
                     QFont font = painter.font();
                     int pixelSize = _sizePixel*0.75f;;
 
@@ -333,7 +339,7 @@ void Display2D::paintEvent(QPaintEvent *event)
 			}
 		}
 	}
-	QPainter screenPainter(this);	
+	QPainter screenPainter(this);
 	screenPainter.save();
     screenPainter.drawPixmap(_offset, imageToDraw.scaled(getRealSize()));
 	screenPainter.restore();
@@ -525,7 +531,7 @@ std::string Display2D::getRasterToolTip( const Engine::Point2D<int> & position )
 }
 
 std::string Display2D::getAgentToolTip( const Engine::Point2D<int> & position )
-{	
+{
 	std::stringstream toolTipString;
 	Engine::SimulationRecord::AgentRecordsVector agents = _simulationRecord->getAgentsAtPosition(_viewedStep/_simulationRecord->getFinalResolution(), position);
 
@@ -543,12 +549,12 @@ std::string Display2D::getAgentToolTip( const Engine::Point2D<int> & position )
 
 
 bool Display2D::event(QEvent *event)
-{  
-	if(event->type()==QEvent::ToolTip) 
+{
+	if(event->type()==QEvent::ToolTip)
 	{
 		QHelpEvent *helpEvent = static_cast<QHelpEvent *>(event);
 		Engine::Point2D<int> position(helpEvent->pos().x()-_offset.x(), helpEvent->pos().y()-_offset.y());
-        
+
 		position._x /= _zoom;
 		position._y /= _zoom;
 
@@ -556,15 +562,15 @@ bool Display2D::event(QEvent *event)
 		std::stringstream posToolTip;
 		posToolTip << "position: " << position << " zoom: " << _zoom;
 		finalToolTip += posToolTip.str();
-	
+
 		if(!_simulationRecord || position._x<0 || position._y<0 || position._x>=_simulationRecord->getSize()._width || position._y>=_simulationRecord->getSize()._height)
 		{
 			QToolTip::showText(helpEvent->globalPos(), finalToolTip.c_str());
 			return QWidget::event(event);
 		}
 		finalToolTip += getRasterToolTip(position);
-		finalToolTip += getAgentToolTip(position);		
-		
+		finalToolTip += getAgentToolTip(position);
+
 		QToolTip::showText(helpEvent->globalPos(), finalToolTip.c_str());
      }
      return QWidget::event(event);
@@ -580,7 +586,7 @@ int Display2D::getRadiusSelection() const
 {
 	return _radiusSelection;
 }
-	
+
 void Display2D::radiusSelectionModified(int radiusSelection)
 {
 	_radiusSelection = radiusSelection;
@@ -592,4 +598,3 @@ void Display2D::setViewedStep( int viewedStep )
 }
 
 } // namespace GUI
-
