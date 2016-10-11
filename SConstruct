@@ -156,7 +156,7 @@ installShare = env.Install(env['installDir'], Glob('./share'))
 installMpiStub = env.Install(env['installDir']+'/utils', Glob('./utils/*.cxx'))
 
 # cassandra
-cassandraCompilation = env.Command("bin/cassandra", "", "cd cassandra && /usr/lib/x86_64-linux-gnu/qt4/bin/qmake && make")
+cassandraCompilation = env.Command("bin/cassandra", "", "cd cassandra && qmake-qt4 && make")
 if platform.system()=='Darwin':
     cassandraCompilation = env.Command("bin/cassandra", "", "cd cassandra && qmake cassandra_osx.pro && make")
 
