@@ -14,10 +14,10 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *  
- * You should have received a copy of the GNU General Public 
+ *
+ * You should have received a copy of the GNU General Public
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 #include <ProjectConfiguration.hxx>
@@ -67,7 +67,7 @@ void ProjectConfiguration::cleanSimulationRecord()
 	if(_simulationRecord)
 	{
 		delete _simulationRecord;
-		_simulationRecord = 0;
+		_simulationRecord = nullptr;
 	}
 	cleanConfigs();
 
@@ -87,7 +87,7 @@ void ProjectConfiguration::loadProject( const std::string & fileName )
 	_fileName = fileName;
 	_projectCreated = true;
 
-	
+
 	TiXmlDocument fileProject;
 	bool loadOkay = fileProject.LoadFile(_fileName);
 	if(!loadOkay)
@@ -102,21 +102,21 @@ void ProjectConfiguration::loadProject( const std::string & fileName )
 
 	loadAgentsConfigs(simulation->FirstChildElement("agents"));
 	loadRastersConfigs(simulation->FirstChildElement("rasters"));
-
 }
 
 bool ProjectConfiguration::loadSimulation()
 {
+	std::cout << "Loading simulation..." << std::endl;
 	if(!_projectCreated)
 	{
 		cleanSimulationRecord();
 	}
 	else
 	{
-		if(_simulationRecord)
+		if(_simulationRecord  != nullptr )
 		{
 			delete _simulationRecord;
-			_simulationRecord = 0;
+			_simulationRecord = nullptr;
 		}
 	}
 	_simulationRecord = new Engine::SimulationRecord(_resolution);
@@ -124,7 +124,7 @@ bool ProjectConfiguration::loadSimulation()
 	if(!_simulationRecord->loadHDF5(_simulationFileName))
 	{
 		delete _simulationRecord;
-		_simulationRecord = 0;
+		_simulationRecord = nullptr;
 		return false;
 	}
 
@@ -163,10 +163,10 @@ void ProjectConfiguration::loadAgentsConfigs( TiXmlElement * agents )
 		agentConfig->setFileName2D( config2d->Attribute("iconPath"));
 		agentConfig->setColor(QColor(config2d->Attribute("color")));
 
-		agentConfig->setFileName3D( config3d->Attribute("model3D"));		
+		agentConfig->setFileName3D( config3d->Attribute("model3D"));
 		Engine::Point3D<float> size3d(atof(config3d->Attribute("x3D")), atof(config3d->Attribute("y3D")), atof(config3d->Attribute("z3D")));
 		agentConfig->setSize3D( size3d );
-		
+
 		_agentsConfig.insert(make_pair(std::string(agent->Attribute("type")), agentConfig));
 		agent = agent->NextSiblingElement();
 	}
@@ -175,13 +175,13 @@ void ProjectConfiguration::loadAgentsConfigs( TiXmlElement * agents )
 void ProjectConfiguration::loadRastersConfigs( TiXmlElement * rasters )
 {
 	std::list<std::string> rastersNames;
-	
+
 	TiXmlElement * raster = rasters->FirstChildElement();
 	while(raster)
 	{
 		// create a raster without initialization
 		int rasterMinValue = atoi(raster->Attribute("minRaster"));
-		int rasterMaxValue = atoi(raster->Attribute("maxRaster"));		
+		int rasterMaxValue = atoi(raster->Attribute("maxRaster"));
 		RasterConfiguration * rasterConfig = new RasterConfiguration( rasterMinValue, rasterMaxValue, false);
 		rasterConfig->setTransparentValue( atoi(raster->Attribute("transparentValue")));
 		rasterConfig->setTransparentEnabled( atoi(raster->Attribute("transparentEnabled")));
@@ -281,7 +281,7 @@ void ProjectConfiguration::storeProject()
 
 	// store agents configs
 	// store rasters configs
-	
+
 	fileProject.LinkEndChild( declaration );
 	fileProject.LinkEndChild( simulation );
 	fileProject.SaveFile(_fileName);
@@ -338,7 +338,7 @@ void ProjectConfiguration::cleanConfigs()
 }
 
 void ProjectConfiguration::loadConfigs()
-{	
+{
 	if(_agentsConfig.size()!=0 || _rastersConfig.size()!=0)
 	{
 		std::stringstream oss;
@@ -350,8 +350,8 @@ void ProjectConfiguration::loadConfigs()
 	for(Engine::SimulationRecord::AgentTypesMap::const_iterator itType = _simulationRecord->beginTypes(); itType!=_simulationRecord->endTypes(); itType++)
 	{
 		_agentsConfig.insert(make_pair( itType->first, new AgentConfiguration() ));
-	}	
-	
+	}
+
 	std::list<std::string> rastersNames;
 	for(Engine::SimulationRecord::RasterMap::const_iterator itRaster = _simulationRecord->beginRasters(); itRaster!=_simulationRecord->endRasters(); itRaster++)
 	{
@@ -414,7 +414,7 @@ AgentConfiguration * ProjectConfiguration::getAgentConfig( const std::string & t
 	if(it==_agentsConfig.end())
 	{
 		std::stringstream oss;
-		oss << "ProjectConfiguration::getAgentConfig - config not found for agent type: " << type; 
+		oss << "ProjectConfiguration::getAgentConfig - config not found for agent type: " << type;
 		throw Engine::Exception(oss.str());
 		return 0;
 	}
@@ -427,7 +427,7 @@ RasterConfiguration * ProjectConfiguration::getRasterConfig( const std::string &
 	if(it==_rastersConfig.end())
 	{
 		std::stringstream oss;
-		oss << "ProjectConfiguration::getRasterConfig - config not found for raster type: " << type; 
+		oss << "ProjectConfiguration::getRasterConfig - config not found for raster type: " << type;
 		throw Engine::Exception(oss.str());
 		return 0;
 	}
@@ -435,4 +435,3 @@ RasterConfiguration * ProjectConfiguration::getRasterConfig( const std::string &
 }
 
 } // namespace GUI
-

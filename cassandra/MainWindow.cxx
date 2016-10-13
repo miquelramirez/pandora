@@ -14,10 +14,10 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *  
- * You should have received a copy of the GNU General Public 
+ *
+ * You should have received a copy of the GNU General Public
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 #include <MainWindow.hxx>
@@ -64,10 +64,10 @@ namespace GUI
 {
 
 MainWindow::MainWindow() : _display2D(0), _display3D(0), _agentTypeSelection(0), _agentTraitSelection(0), _rasterSelection(0), _genericStatistics(0), _viewedStep(0), _progressBar(0)//, _Raster3D(0)//, _windowRaster(true)*/
-{ 
+{
 	QDockWidget * agentTypeSelectionDock = new QDockWidget(tr("Agent Types"), this);
 	agentTypeSelectionDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-	_agentTypeSelection = new AgentTypeSelection(agentTypeSelectionDock);	
+	_agentTypeSelection = new AgentTypeSelection(agentTypeSelectionDock);
 	agentTypeSelectionDock->setWidget(_agentTypeSelection);
 	addDockWidget(Qt::LeftDockWidgetArea, agentTypeSelectionDock);
 
@@ -83,8 +83,8 @@ MainWindow::MainWindow() : _display2D(0), _display3D(0), _agentTypeSelection(0),
 	rasterSelectionDock->setWidget(_rasterSelection);
 	addDockWidget(Qt::LeftDockWidgetArea, rasterSelectionDock);
 
-	QDockWidget * genericStatisticsDock = new QDockWidget(tr("Generic Statistics"), this);	
-	genericStatisticsDock->setAllowedAreas(Qt::BottomDockWidgetArea);	
+	QDockWidget * genericStatisticsDock = new QDockWidget(tr("Generic Statistics"), this);
+	genericStatisticsDock->setAllowedAreas(Qt::BottomDockWidgetArea);
 	_genericStatistics = new GenericStatistics(genericStatisticsDock);
 
 	genericStatisticsDock->setWidget(_genericStatistics);
@@ -97,16 +97,16 @@ MainWindow::MainWindow() : _display2D(0), _display3D(0), _agentTypeSelection(0),
 	_agentAnalysis = new AgentAnalysis(this);
 	_rasterAnalysis = new RasterAnalysis(this);
 	_settings = new Settings;
-	
+
 	_display2D->show();
 	_display3D->hide();
 	_laboratory->hide();
 	_agentAnalysis->hide();
 	_settings->hide();
-	
+
     setCentralWidget(_display2D);
 //	setCentralWidget(_display3D);
-	
+
 	connect(this, SIGNAL(newViewedStep(int)), _display2D, SLOT(viewedStepChangedSlot(int)));
     connect(this, SIGNAL(newViewedStep(int)), _display3D, SLOT(viewedStepChangedSlot(int)));
 	connect(this, SIGNAL(newViewedStep(int)), _genericStatistics, SLOT(viewedStepChangedSlot(int)));
@@ -124,7 +124,7 @@ MainWindow::MainWindow() : _display2D(0), _display3D(0), _agentTypeSelection(0),
   //  connect(_rasterSelection, SIGNAL(rastersRearranged(std::list<std::string>)), displayAgent, SLOT(rastersRearranged(std::list<std::string>)));
 
 
-	// file menu 
+	// file menu
 	_newProjectAction = new QAction(QIcon(":share/cassandra/icons/project_new.png"), tr("&New Project"), this);
 	_newProjectAction->setShortcut(tr("Ctrl+N"));
 	_newProjectAction->setStatusTip(tr("Create new project"));
@@ -144,7 +144,7 @@ MainWindow::MainWindow() : _display2D(0), _display3D(0), _agentTypeSelection(0),
 	_saveProjectAsAction->setShortcut(tr("Ctrl+Alt+S"));
 	_saveProjectAsAction->setStatusTip(tr("Save project as"));
 	connect(_saveProjectAsAction, SIGNAL(triggered()), this, SLOT(saveProjectAs()));
-	
+
 	_selectSimulationAction= new QAction(QIcon(":share/cassandra/icons/simulation_select.png"), tr("&Select Simulation..."), this);
 	_selectSimulationAction->setStatusTip(tr("Select simulation to load"));
 	connect(_selectSimulationAction, SIGNAL(triggered()), this, SLOT(selectSimulation()));
@@ -172,35 +172,35 @@ MainWindow::MainWindow() : _display2D(0), _display3D(0), _agentTypeSelection(0),
 	_nextStepAction = new QAction(QIcon(":share/cassandra/icons/next.png"), tr("&Next"), this);
 	_nextStepAction->setShortcut(tr("Ctrl+N"));
 	_nextStepAction->setStatusTip(tr("Next Step"));
-	connect(_nextStepAction, SIGNAL(triggered()), this, SLOT(nextStep()));	
-	
+	connect(_nextStepAction, SIGNAL(triggered()), this, SLOT(nextStep()));
+
 	_finalStepAction = new QAction(QIcon(":share/cassandra/icons/final.png"), tr("&Final"), this);
 	_finalStepAction->setShortcut(tr("Ctrl+F"));
 	_finalStepAction->setStatusTip(tr("Final Step"));
 	connect(_finalStepAction, SIGNAL(triggered()), this, SLOT(finalStep()));
-	
+
 	_playAction = new QAction(QIcon(":share/cassandra/icons/play.png"), tr("&Play"), this);
 	_playAction->setShortcut(tr("Ctrl+Space"));
 	_playAction->setStatusTip(tr("Play/Pause"));
 	connect(_playAction, SIGNAL(triggered()), this, SLOT(play()));
 
 	// View Menu
-	
+
 	_zoomInAction = new QAction(QIcon(":share/cassandra/icons/zoomIn.png"), tr("&Zoom In"), this);
 	_zoomInAction->setShortcut(tr("Ctrl++"));
 	_zoomInAction->setStatusTip(tr("Zoom In"));
 	connect(_zoomInAction, SIGNAL(triggered()), _display2D, SLOT(zoomIn()));
-	
+
 	_zoomOutAction = new QAction(QIcon(":share/cassandra/icons/zoomOut.png"), tr("&Zoom Out"), this);
 	_zoomOutAction->setShortcut(tr("Ctrl+-"));
 	_zoomOutAction->setStatusTip(tr("Zoom Out"));
 	connect(_zoomOutAction, SIGNAL(triggered()), _display2D, SLOT(zoomOut()));
-	
+
 	_showAgentsAction = new QAction(QIcon(":share/cassandra/icons/agents.png"), tr("&Show Agents"), this);
 	_showAgentsAction->setShortcut(tr("Ctrl+A"));
 	_showAgentsAction->setStatusTip(tr("Show Agents"));
 	connect(_showAgentsAction, SIGNAL(triggered()), _display2D, SLOT(showAgents()));
-	
+
     _show3DAction = new QAction(QIcon(":share/cassandra/icons/3dview.png"), tr("&Raster 3D"), this);
 	_show3DAction->setShortcut(tr("Ctrl+3"));
 	_show3DAction->setStatusTip(tr("Show 3D raster"));
@@ -269,7 +269,7 @@ MainWindow::MainWindow() : _display2D(0), _display3D(0), _agentTypeSelection(0),
 	analysisMenu->addSeparator();
 	analysisMenu->addAction(_agentAnalysisAction);
 	analysisMenu->addAction(_rasterAnalysisAction);
-    
+
     QMenu * outputMenu = menuBar()->addMenu(tr("&Output"));
 	outputMenu->addSeparator();
 	outputMenu->addAction(_screenshotAction);
@@ -288,7 +288,7 @@ MainWindow::MainWindow() : _display2D(0), _display3D(0), _agentTypeSelection(0),
 	fileBar->addAction(_saveProjectAction);
 	fileBar->addAction(_saveProjectAsAction);
 	fileBar->addAction(_selectSimulationAction);
-	
+
 	QToolBar * simulationBar = addToolBar(tr("Simulation Controls"));
 	simulationBar->addAction(_firstStepAction);
 	simulationBar->addAction(_previousStepAction);
@@ -300,23 +300,23 @@ MainWindow::MainWindow() : _display2D(0), _display3D(0), _agentTypeSelection(0),
 	QToolBar * outputBar = addToolBar(tr("Output"));
 	outputBar->addAction(_screenshotAction);
 	outputBar->addAction(_videoAction);
-	outputBar->addAction(_mosaicAction);	
-    
+	outputBar->addAction(_mosaicAction);
+
     QToolBar * edaBar = addToolBar(tr("EDA"));
 	edaBar->addAction(_heatMapAction);
 	edaBar->addAction(_timeSeriesAction);
-	
+
 	QLabel * label = new QLabel("Step: ");
 	simulationBar->addWidget(label);
-	
+
 	_stepBox = new QSpinBox();
 	connect(_stepBox, SIGNAL(valueChanged(int)), this, SLOT(viewedStepChanged(int)));
 	connect(this, SIGNAL(stepChangeToStepBox(int)), _stepBox, SLOT(setValue(int)));
 	simulationBar->addWidget(_stepBox);
-	
+
 	QLabel * label2 = new QLabel(" of ");
 	simulationBar->addWidget(label2);
-	
+
 	_numStepsLabel = new QLabel();
 	_numStepsLabel->setNum(0);
 	simulationBar->addWidget(_numStepsLabel);
@@ -325,13 +325,13 @@ MainWindow::MainWindow() : _display2D(0), _display3D(0), _agentTypeSelection(0),
 	simulationBar->addAction(_playAction);
 
 	QToolBar * viewBar = addToolBar(tr("View Options"));
-	viewBar->addAction(_zoomOutAction);			
+	viewBar->addAction(_zoomOutAction);
 	viewBar->addAction(_zoomInAction);
 	viewBar->addAction(_showAgentsAction);
 	viewBar->addSeparator();
 	viewBar->addAction(_show3DAction);
 	viewBar->addAction(_showLabAction);
-	
+
 	// TODO un thread diferent?
 	_playTimer = new QTimer(this);
 	_playTimer->setInterval(10);
@@ -341,7 +341,7 @@ MainWindow::MainWindow() : _display2D(0), _display3D(0), _agentTypeSelection(0),
 	_loadSimulationTimer->setInterval(100);
 
 	_stepBox->setEnabled(false);
-	
+
 	_firstStepAction->setEnabled(false);
 	_previousStepAction->setEnabled(false);
 	_nextStepAction->setEnabled(false);
@@ -425,7 +425,7 @@ void MainWindow::adjustGUI()
     _genericStatistics->setSimulationRecord(ProjectConfiguration::instance()->getSimulationRecord());
 
 	if(!ProjectConfiguration::instance()->getSimulationRecord())
-	{	
+	{
 		_stepBox->setEnabled(false);
 
 		_firstStepAction->setEnabled(false);
@@ -438,7 +438,7 @@ void MainWindow::adjustGUI()
 		_zoomOutAction->setEnabled(false);
 		_showAgentsAction->setEnabled(false);
 		_show3DAction->setEnabled(false);
-		
+
 		_saveProjectAction->setEnabled(false);
 		_saveProjectAsAction->setEnabled(false);
 
@@ -451,10 +451,10 @@ void MainWindow::adjustGUI()
 	_stepBox->setRange(0, ProjectConfiguration::instance()->getSimulationRecord()->getNumSteps());
 	_stepBox->setSingleStep(ProjectConfiguration::instance()->getResolution());
 
-	_numStepsLabel->setNum(ProjectConfiguration::instance()->getSimulationRecord()->getNumSteps());	
+	_numStepsLabel->setNum(ProjectConfiguration::instance()->getSimulationRecord()->getNumSteps());
 
 	_stepBox->setEnabled(true);
-	
+
 	_firstStepAction->setEnabled(true);
 	_previousStepAction->setEnabled(true);
 	_nextStepAction->setEnabled(true);
@@ -471,7 +471,7 @@ void MainWindow::adjustGUI()
 
     _screenshotAction->setEnabled(true);
     _videoAction->setEnabled(true);
-	
+
 	_settings->setRadiusSelection(3);
 
 	update();
@@ -540,7 +540,7 @@ void MainWindow::viewedStepChanged( int viewedStep )
 	int mod = viewedStep%(ProjectConfiguration::instance()->getSimulationRecord()->getSerializedResolution()*ProjectConfiguration::instance()->getResolution());
 	/*
 	if(mod!=0)
-	{	
+	{
 		emit stepChangeToStepBox(viewedStep);
 		return;
 	}
@@ -548,7 +548,7 @@ void MainWindow::viewedStepChanged( int viewedStep )
 	_viewedStep = viewedStep - mod;
 	emit newViewedStep(_viewedStep);
 }
-	
+
 void MainWindow::openAgentConfigurator(QListWidgetItem * item)
 {
 	std::string type(item->text().toStdString());
@@ -567,9 +567,9 @@ void MainWindow::agentConfigured( const std::string & type, const AgentConfigura
 {
     ProjectConfiguration::instance()->updateAgentConfig(type, config);
 }
-	
+
 void MainWindow::rasterConfigured( const std::string & type, const RasterConfiguration & config )
-{	
+{
 	ProjectConfiguration::instance()->updateRasterConfig(type, config);
 	_display3D->updateRasterConfig();
 }
@@ -648,11 +648,12 @@ void MainWindow::loadProject()
 
 		QRect windowSize(geometry());
 		_progressBar->move(windowSize.x()+(windowSize.width()-_progressBar->geometry().width())/2, windowSize.y()+(windowSize.height()-_progressBar->geometry().height())/2);
-	
-		adjustGUI();
+
+
 		_progressBar->initLoading();
 		_loadSimulationThread.start();
 		_loadSimulationTimer->start();
+		adjustGUI();
 	}
 }
 
@@ -678,7 +679,7 @@ void MainWindow::saveProjectAs()
 		ProjectConfiguration::instance()->storeProject(fileName.toStdString());
 	}
 }
-	
+
 void MainWindow::loadSimulationFinished( bool correct )
 {
 	_progressBar->hide();
@@ -738,7 +739,7 @@ void MainWindow::takeScreenshot()
     {
         return;
     }
-    
+
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save Screenshot"), "", tr("Image Files (*.png *.jpg *.bmp)"));
 	if(fileName.isEmpty())
 	{
@@ -752,10 +753,10 @@ void MainWindow::takeScreenshot()
 }
 
 void MainWindow::takeVideo( const std::string & outputDir )
-{ 
+{
     int incrementStep = ProjectConfiguration::instance()->getSimulationRecord()->getSerializedResolution()*ProjectConfiguration::instance()->getResolution();
     int finalStep = ProjectConfiguration::instance()->getSimulationRecord()->getNumSteps();
-    
+
     _display2D->resetView();
     QImage img(_display2D->getRealSize(), QImage::Format_RGB16);
     QPainter painter(&img);
@@ -780,8 +781,8 @@ void MainWindow::takeVideo()
 	if(dir.isEmpty())
 	{
 		return;
-	}	
-   
+	}
+
     std::string outputDir = dir.toStdString();
     if(boost::filesystem::exists(outputDir) && !boost::filesystem::is_empty(outputDir))
 	{
@@ -809,7 +810,7 @@ void MainWindow::takeMosaic()
 	if(dir.isEmpty())
 	{
 		return;
-	}	
+	}
     std::string outputDir = dir.toStdString();
     if(boost::filesystem::exists(outputDir) && !boost::filesystem::is_empty(outputDir))
 	{
@@ -861,7 +862,7 @@ void MainWindow::takeMosaic()
 			continue;
 		}
 		std::stringstream oss;
-		oss << (*it).path().native() << "/config.xml";	
+		oss << (*it).path().native() << "/config.xml";
 		TiXmlDocument doc(oss.str().c_str());
 		if (!doc.LoadFile())
 		{
@@ -872,7 +873,7 @@ void MainWindow::takeMosaic()
 		}
 		TiXmlHandle hDoc(&doc);
 		TiXmlHandle hRoot(0);
-    
+
 		TiXmlElement * root = doc.FirstChildElement( "config" );
 		TiXmlElement * output = root->FirstChildElement("output");
 		std::string dataFile = (*it).path().native()+"/"+output->Attribute("resultsFile");
@@ -905,10 +906,10 @@ void MainWindow::heatMap()
     HeatMapDialog * dialog = new HeatMapDialog(0, fileName.toStdString());
     dialog->show();
     dialog->update();
-}  
+}
 
 void MainWindow::timeSeries()
-{    
+{
     QString fileName = QFileDialog::getOpenFileName(this, tr("Select file with grouped results"), "", tr("Comma Separated Value (*.csv);;All Files (*)"));
 	if (fileName.isEmpty())
 	{
@@ -923,5 +924,3 @@ void MainWindow::timeSeries()
 
 
 } // namespace GUI
-
-
